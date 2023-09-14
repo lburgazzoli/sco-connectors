@@ -1,5 +1,6 @@
 package com.github.sco1237896.connector.it.messaging.http
 
+import com.github.sco1237896.connector.it.support.KafkaContainer
 import com.github.tomakehurst.wiremock.client.WireMock
 import groovy.util.logging.Slf4j
 import com.github.sco1237896.connector.it.support.ContainerImages
@@ -46,7 +47,7 @@ class HttpConnectorIT extends KafkaConnectorSpec {
     def "http sink"() {
         setup:
             def topic = topic()
-            def group = UUID.randomUUID().toString()
+            def group = uid()
             def payload = '''{ "foo": "bar" }'''
 
             def path = urlPathEqualTo("/run")
@@ -66,7 +67,11 @@ class HttpConnectorIT extends KafkaConnectorSpec {
                 .withSourceProperties([
                     'topic': topic,
                     'bootstrapServers': kafka.outsideBootstrapServers,
-                    'consumerGroup': UUID.randomUUID().toString(),
+                    'consumerGroup': uid(),
+                    'user': kafka.username,
+                    'password': kafka.password,
+                    'securityProtocol': KafkaContainer.SECURITY_PROTOCOL,
+                    'saslMechanism': KafkaContainer.SASL_MECHANISM,
                 ])
                 .withSinkProperties([
                     'method': 'POST',
@@ -74,7 +79,6 @@ class HttpConnectorIT extends KafkaConnectorSpec {
                 ])
                 .build()
 
-            cnt.withCamelComponentDebugEnv()
             cnt.start()
         when:
             kafka.send(topic, payload, [

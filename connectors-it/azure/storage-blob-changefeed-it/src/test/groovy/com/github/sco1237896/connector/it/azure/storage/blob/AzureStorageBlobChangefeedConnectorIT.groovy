@@ -6,6 +6,7 @@ import com.azure.core.util.BinaryData
 import com.azure.storage.blob.BlobContainerClient
 import com.azure.storage.blob.BlobServiceClientBuilder
 import com.azure.storage.common.StorageSharedKeyCredential
+import com.github.sco1237896.connector.it.support.KafkaContainer
 import groovy.json.JsonSlurper
 import groovy.util.logging.Slf4j
 import com.github.sco1237896.connector.it.support.KafkaConnectorSpec
@@ -27,7 +28,7 @@ class AzureStorageBlobChangefeedConnectorIT extends KafkaConnectorSpec {
     def "azure-storage-blob-changefeed source"() {
         setup:
             def topic = topic()
-            def group = UUID.randomUUID().toString()
+            def group = uid()
             def payload = topic
 
             def containerName = System.getenv('AZURE_BLOB_CONTAINER_NAME')
@@ -41,7 +42,11 @@ class AzureStorageBlobChangefeedConnectorIT extends KafkaConnectorSpec {
                 .withSinkProperties([
                         'topic': topic,
                         'bootstrapServers': kafka.outsideBootstrapServers,
-                        'consumerGroup': UUID.randomUUID().toString(),
+                        'consumerGroup': uid(),
+                        'user': kafka.username,
+                        'password': kafka.password,
+                        'securityProtocol': KafkaContainer.SECURITY_PROTOCOL,
+                        'saslMechanism': KafkaContainer.SASL_MECHANISM,
                 ])
                 .withSourceProperties([
                     'period': '5000',

@@ -1,5 +1,6 @@
 package com.github.sco1237896.connector.it.sql.mysql
 
+import com.github.sco1237896.connector.it.support.KafkaContainer
 import groovy.sql.Sql
 import groovy.util.logging.Slf4j
 import com.github.sco1237896.connector.it.support.ContainerImages
@@ -41,13 +42,17 @@ class MySqlConnectorIT extends KafkaConnectorSpec {
             """)
 
             def topic = topic()
-            def group = UUID.randomUUID().toString()
+            def group = uid()
 
             def cnt = forDefinition('mysql_sink_v1.yaml')
                 .withSourceProperties([
                     'topic': topic,
                     'bootstrapServers': kafka.outsideBootstrapServers,
-                    'consumerGroup': UUID.randomUUID().toString(),
+                    'consumerGroup': uid(),
+                    'user': kafka.username,
+                    'password': kafka.password,
+                    'securityProtocol': KafkaContainer.SECURITY_PROTOCOL,
+                    'saslMechanism': KafkaContainer.SASL_MECHANISM,
                 ])
                 .withSinkProperties([
                     'serverName': CONTAINER_NAME,

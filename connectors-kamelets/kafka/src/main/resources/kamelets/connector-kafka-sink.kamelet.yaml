@@ -39,6 +39,8 @@ spec:
           username: '{{user}}'
           password: '{{password}}'
           producerCreationRetryMs: '{{producerCreationRetryMs:5000}}'
+          securityProtocol: "{{securityProtocol:}}"
+          saslMechanism: "{{saslMechanism:}}"
       - name: "kafka-header-serializer"
         type: "#class:com.github.sco1237896.connector.kamelet.kafka.DefaultKafkaHeaderSerializer"
     from:
@@ -58,12 +60,12 @@ spec:
             - set-header:
                 name: kafka.PARTITION_KEY
                 simple: "${header[partition-key]}"
+      - convertBodyTo:
+          type: "byte[]"
+          charset: "UTF8"
       - to:
           uri: "kafka:{{topic}}"
           parameters:
-            securityProtocol: "{{securityProtocol:SASL_SSL}}"
-            saslMechanism: "{{saslMechanism:PLAIN}}"
-            saslJaasConfig: "org.apache.kafka.common.security.plain.PlainLoginModule required username='{{user}}' password='{{password}}';"
             keySerializer: "{{keySerializer:org.apache.kafka.common.serialization.ByteArraySerializer}}"
             valueSerializer: "{{valueSerializer:com.github.sco1237896.connector.kamelet.serdes.bytes.ByteArraySerializer}}"
             kafkaClientFactory: "#{{kafka-client-factory}}"

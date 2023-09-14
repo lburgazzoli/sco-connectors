@@ -2,6 +2,7 @@ package com.github.sco1237896.connector.it.saas.salesforce
 
 
 import com.github.sco1237896.connector.it.support.KafkaConnectorSpec
+import com.github.sco1237896.connector.it.support.KafkaContainer
 import spock.lang.IgnoreIf
 import spock.lang.Stepwise
 
@@ -21,14 +22,18 @@ class SalesforceConnectorIT extends KafkaConnectorSpec {
     def "salesforce create sink"() {
         setup:
             def topic = topic()
-            def group = UUID.randomUUID().toString()
+            def group = uid()
             def payload = """{ "Name" : "${group}" }"""
 
              def cnt = forDefinition('create_sink_v1.yaml')
                 .withSourceProperties([
                         'topic': topic,
                         'bootstrapServers': kafka.outsideBootstrapServers,
-                        'consumerGroup': UUID.randomUUID().toString(),
+                        'consumerGroup': uid(),
+                        'user': kafka.username,
+                        'password': kafka.password,
+                        'securityProtocol': KafkaContainer.SECURITY_PROTOCOL,
+                        'saslMechanism': KafkaContainer.SASL_MECHANISM,
                 ])
                 .withSinkProperties([
                     'clientId': System.getenv('SF_CLIENT_ID'),
@@ -62,14 +67,18 @@ class SalesforceConnectorIT extends KafkaConnectorSpec {
     def "salesforce update sink"() {
         setup:
             def topic = topic()
-            def group = UUID.randomUUID().toString()
+            def group = uid()
             def payload = """{ "Name" : "${group}" }"""
 
             def cnt = forDefinition('update_sink_v1.yaml')
                 .withSourceProperties([
                         'topic': topic,
                         'bootstrapServers': kafka.outsideBootstrapServers,
-                        'consumerGroup': UUID.randomUUID().toString(),
+                        'consumerGroup': uid(),
+                        'user': kafka.username,
+                        'password': kafka.password,
+                        'securityProtocol': KafkaContainer.SECURITY_PROTOCOL,
+                        'saslMechanism': KafkaContainer.SASL_MECHANISM,
                 ])
                 .withSinkProperties([
                         'clientId': System.getenv('SF_CLIENT_ID'),
@@ -104,7 +113,11 @@ class SalesforceConnectorIT extends KafkaConnectorSpec {
                 .withSourceProperties([
                         'topic': topic,
                         'bootstrapServers': kafka.outsideBootstrapServers,
-                        'consumerGroup': UUID.randomUUID().toString(),
+                        'consumerGroup': uid(),
+                        'user': kafka.username,
+                        'password': kafka.password,
+                        'securityProtocol': KafkaContainer.SECURITY_PROTOCOL,
+                        'saslMechanism': KafkaContainer.SASL_MECHANISM,
                 ])
                 .withSinkProperties([
                         'clientId': System.getenv('SF_CLIENT_ID'),

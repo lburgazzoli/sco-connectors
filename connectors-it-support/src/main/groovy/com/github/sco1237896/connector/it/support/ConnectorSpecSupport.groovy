@@ -3,6 +3,7 @@ package com.github.sco1237896.connector.it.support
 import groovy.json.JsonBuilder
 import groovy.util.logging.Slf4j
 import org.awaitility.Awaitility
+import org.bson.types.ObjectId
 import org.junit.function.ThrowingRunnable
 import org.slf4j.LoggerFactory
 import org.testcontainers.containers.output.Slf4jLogConsumer
@@ -69,9 +70,17 @@ abstract class ConnectorSpecSupport extends Specification {
         String value = System.getenv(envName)
 
         if (value == null) {
-            return
+            return false
         }
 
         return value.trim().length() != 0
+    }
+
+    static String uid() {
+        return ObjectId.get().toString();
+    }
+
+    static String uid(String prefix) {
+        return prefix + uid();
     }
 }

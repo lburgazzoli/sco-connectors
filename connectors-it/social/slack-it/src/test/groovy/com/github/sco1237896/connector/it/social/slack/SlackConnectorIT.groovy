@@ -1,5 +1,6 @@
 package com.github.sco1237896.connector.it.social.slack
 
+import com.github.sco1237896.connector.it.support.KafkaContainer
 import groovy.util.logging.Slf4j
 import io.restassured.RestAssured
 import com.github.sco1237896.connector.it.support.KafkaConnectorSpec
@@ -19,7 +20,7 @@ class SlackConnectorIT extends KafkaConnectorSpec {
     def "slack source"() {
         given:
             def topic = topic()
-            def group = UUID.randomUUID().toString()
+            def group = uid()
             def count = 10
             def target = URI.create(System.getenv('SLACK_TEST_WEBHOOK'))
             def messages = new TreeSet<String>()
@@ -29,7 +30,11 @@ class SlackConnectorIT extends KafkaConnectorSpec {
                 .withSinkProperties([
                         'topic': topic,
                         'bootstrapServers': kafka.outsideBootstrapServers,
-                        'consumerGroup': UUID.randomUUID().toString(),
+                        'consumerGroup': uid(),
+                        'user': kafka.username,
+                        'password': kafka.password,
+                        'securityProtocol': KafkaContainer.SECURITY_PROTOCOL,
+                        'saslMechanism': KafkaContainer.SASL_MECHANISM,
                 ])
                 .withSourceProperties([
                         'channel': System.getenv('SLACK_TEST_CHANNEL'),

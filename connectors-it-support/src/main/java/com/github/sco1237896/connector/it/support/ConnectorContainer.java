@@ -1,25 +1,19 @@
 package com.github.sco1237896.connector.it.support;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Properties;
-import java.util.TreeMap;
-import java.util.function.Consumer;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
+import com.github.dockerjava.api.command.InspectContainerResponse;
+import com.github.dockerjava.api.command.StopContainerCmd;
+import io.restassured.RestAssured;
+import io.restassured.specification.RequestSpecification;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.commons.text.CaseUtils;
+import org.apache.commons.text.TextStringBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.GenericContainer;
@@ -28,17 +22,20 @@ import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.images.builder.Transferable;
 import org.testcontainers.utility.DockerImageName;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
-import com.github.dockerjava.api.command.InspectContainerResponse;
-import com.github.dockerjava.api.command.StopContainerCmd;
-
-import io.restassured.RestAssured;
-import io.restassured.specification.RequestSpecification;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Properties;
+import java.util.TreeMap;
+import java.util.function.Consumer;
 
 public class ConnectorContainer extends GenericContainer<ConnectorContainer> {
     private static final Logger LOGGER = LoggerFactory.getLogger(ConnectorContainer.class);
@@ -167,24 +164,23 @@ public class ConnectorContainer extends GenericContainer<ConnectorContainer> {
     @Override
     protected void containerIsStopping(InspectContainerResponse containerInfo) {
         super.containerIsStopped(containerInfo);
-        LOGGER.info("Container is stopping. Attempting to wait for graceful stop for {} seconds.", GRACEFUL_STOP_TIMEOUT);
-        try (StopContainerCmd stopContainerCmd = getDockerClient()
-                .stopContainerCmd(getContainerId())
-                .withTimeout(GRACEFUL_STOP_TIMEOUT)) {
-            stopContainerCmd.exec();
-            LOGGER.info("Container was gracefully stopped.");
+
+        String id = getContainerId();
+
+        LOGGER.info("Container is stopping. Attempting to wait for graceful stop container {} for {} seconds.",
+                id,
+                GRACEFUL_STOP_TIMEOUT);
+
+        try (StopContainerCmd cmd = getDockerClient().stopContainerCmd(id).withTimeout(GRACEFUL_STOP_TIMEOUT)) {
+            cmd.exec();
+            LOGGER.info("Container {} was gracefully stopped.", id);
         } catch (Exception e) {
-            LOGGER.error("Failed to gracefully stop container, this might lead to resource leaking.", e);
+            LOGGER.error("Failed to gracefully stop container {}, this might lead to resource leaking.", id, e);
         }
     }
 
     public static Builder forDefinition(String definition) {
         return new Builder(definition);
-    }
-
-    public void withCamelComponentDebugEnv() {
-        withEnv("quarkus.log.level", "DEBUG");
-        withEnv("quarkus.log.category.\"org.apache.camel.component\".level", "DEBUG");
     }
 
     public static class Builder {
@@ -291,13 +287,6 @@ public class ConnectorContainer extends GenericContainer<ConnectorContainer> {
                     String sourceKamelet = def.requiredAt("/definition/spec/source/ref/name").asText();
                     String sinkKamelet = def.requiredAt("/definition/spec/sink/ref/name").asText();
 
-                    if (sourceKamelet.equals("connector-kafka-source")) {
-                        sourceKamelet = "connector-kafka-not-secured-source";
-                    }
-                    if (sinkKamelet.equals("connector-kafka-sink")) {
-                        sinkKamelet = "connector-kafka-not-secured-sink";
-                    }
-
                     ArrayNode integration = yaml.createArrayNode();
                     ObjectNode route = integration.addObject().with("route");
 
@@ -334,12 +323,25 @@ public class ConnectorContainer extends GenericContainer<ConnectorContainer> {
 
                     String routeYaml = yaml.writerWithDefaultPrettyPrinter().writeValueAsString(integration);
 
-                    LOGGER.info("\n\n----------------\nroute: \n{}\n----------------\n\n", routeYaml);
+                    TextStringBuilder sb = new TextStringBuilder();
+                    sb.appendNewLine();
+                    sb.appendln(StringUtils.leftPad("", 78, '*'));
+
+                    sb.appendln("source:");
+                    sb.appendPadding(2, ' ');
+                    sb.appendln(routeYaml);
+
+                    if (!userProperties.isEmpty()) {
+                        sb.appendln("user properties:");
+                        sb.appendPadding(2, ' ');
+                        sb.appendln(userProperties);
+                    }
 
                     answer.withFile(DEFAULT_ROUTE_LOCATION, routeYaml);
 
-                    LOGGER.info("\n\n----------------\nuser properties: \n{}\n----------------\n\n", userProperties);
-                    answer.withUserProperties(userProperties);
+                    if (!userProperties.isEmpty()) {
+                        answer.withUserProperties(userProperties);
+                    }
 
                     try (InputStream ip = ConnectorContainer.class.getResourceAsStream("/integration-application.properties")) {
                         if (ip == null) {
@@ -348,11 +350,18 @@ public class ConnectorContainer extends GenericContainer<ConnectorContainer> {
 
                         byte[] bytes = ip.readAllBytes();
 
-                        LOGGER.info("\n\n----------------\napplication properties: \n{}\n----------------\n\n",
-                                new String(bytes));
+                        if (bytes.length > 0) {
+                            sb.appendln("application properties:");
+                            sb.appendPadding(2, ' ');
+                            sb.appendln(new String(bytes, StandardCharsets.UTF_8));
+                        }
 
                         answer.withFile(DEFAULT_APPLICATION_PROPERTIES_LOCATION, new ByteArrayInputStream(bytes));
                     }
+
+                    sb.appendln(StringUtils.leftPad("", 78, '*'));
+
+                    LOGGER.info(sb.build());
                 }
 
                 if (this.network != null) {

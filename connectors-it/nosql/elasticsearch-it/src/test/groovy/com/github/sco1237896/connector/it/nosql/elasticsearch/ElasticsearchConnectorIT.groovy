@@ -1,5 +1,6 @@
 package com.github.sco1237896.connector.it.nosql.elasticsearch
 
+import com.github.sco1237896.connector.it.support.KafkaContainer
 import groovy.util.logging.Slf4j
 import com.github.sco1237896.connector.it.support.KafkaConnectorSpec
 import com.github.sco1237896.connector.it.support.TestUtils
@@ -46,7 +47,11 @@ class ElasticsearchConnectorIT extends KafkaConnectorSpec {
                 .withSourceProperties([
                         'topic': topic,
                         'bootstrapServers': kafka.outsideBootstrapServers,
-                        'consumerGroup': UUID.randomUUID().toString(),
+                        'consumerGroup': uid(),
+                        'user': kafka.username,
+                        'password': kafka.password,
+                        'securityProtocol': KafkaContainer.SECURITY_PROTOCOL,
+                        'saslMechanism': KafkaContainer.SASL_MECHANISM,
                 ])
                 .withSinkProperties(props)
                 .build()

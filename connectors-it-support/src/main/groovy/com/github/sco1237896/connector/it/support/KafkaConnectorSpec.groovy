@@ -44,11 +44,7 @@ abstract class KafkaConnectorSpec extends ConnectorSpecSupport {
     // **********************************
 
     String topic() {
-        def topic = UUID.randomUUID().toString()
-
-        kafka.createTopic(topic)
-
-        return topic
+        return uid()
     }
 
     ConnectorContainer.Builder forDefinition(String definition) {

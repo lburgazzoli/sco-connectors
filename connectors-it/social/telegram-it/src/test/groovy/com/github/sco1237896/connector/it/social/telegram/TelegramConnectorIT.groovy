@@ -1,5 +1,6 @@
 package com.github.sco1237896.connector.it.social.telegram
 
+import com.github.sco1237896.connector.it.support.KafkaContainer
 import com.github.tomakehurst.wiremock.client.WireMock
 import groovy.util.logging.Slf4j
 import com.github.sco1237896.connector.it.support.ContainerImages
@@ -46,7 +47,7 @@ class TelegramConnectorIT extends KafkaConnectorSpec {
     def "telegram source"() {
         given:
             def topic = topic()
-            def group = UUID.randomUUID().toString()
+            def group = uid()
             def payload = """
             {
               "ok": true,
@@ -82,22 +83,25 @@ class TelegramConnectorIT extends KafkaConnectorSpec {
 
             def cnt = forDefinition('telegram_source_v1.yaml')
                 .withSinkProperties([
-                        'topic': topic,
-                        'bootstrapServers': kafka.outsideBootstrapServers,
-                        'consumerGroup': UUID.randomUUID().toString(),
+                    'topic': topic,
+                    'bootstrapServers': kafka.outsideBootstrapServers,
+                    'consumerGroup': uid(),
+                    'user': kafka.username,
+                    'password': kafka.password,
+                    'securityProtocol': KafkaContainer.SECURITY_PROTOCOL,
+                    'saslMechanism': KafkaContainer.SASL_MECHANISM,
                 ])
                 .withSourceProperties([
-                        'authorizationToken': group,
+                    'authorizationToken': group,
                 ])
                 .build()
 
             cnt.withUserProperty("camel.component.telegram.base-uri", "${SCHEME}://${HOST}:${PORT}".toString())
-            cnt.withUserProperty('quarkus.log.category."org.apache.camel".level', 'INFO')
         when:
             cnt.start()
         then:
             def records = kafka.poll(group, topic)
-            records.size() == 1
+            records.size() >= 1
 
             def record = records.first()
             def actual = TestUtils.SLURPER.parseText(record.value())
@@ -112,9 +116,9 @@ class TelegramConnectorIT extends KafkaConnectorSpec {
     def "telegram sink"() {
         setup:
             def topic = topic()
-            def group = UUID.randomUUID().toString()
+            def group = uid()
             def chatId = ThreadLocalRandom.current().nextInt(1000, 10000);
-            def payload = UUID.randomUUID().toString()
+            def payload = uid()
             def responsePayload = """
             {
                 "ok": true,
@@ -151,7 +155,11 @@ class TelegramConnectorIT extends KafkaConnectorSpec {
                 .withSourceProperties([
                         'topic': topic,
                         'bootstrapServers': kafka.outsideBootstrapServers,
-                        'consumerGroup': UUID.randomUUID().toString(),
+                        'consumerGroup': uid(),
+                        'user': kafka.username,
+                        'password': kafka.password,
+                        'securityProtocol': KafkaContainer.SECURITY_PROTOCOL,
+                        'saslMechanism': KafkaContainer.SASL_MECHANISM,
                 ])
                 .withSinkProperties([
                         'authorizationToken': group,

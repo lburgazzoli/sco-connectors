@@ -50,6 +50,8 @@
         <qpid-jms.version>1.0.0</qpid-jms.version>
         <mustache.version>0.9.10</mustache.version>
         <azure-storage-blob-changefeed.version>12.0.0-beta.17</azure-storage-blob-changefeed.version>
+        <testcontainers.version>1.19.0</testcontainers.version>
+        <docker-java.version>3.3.3</docker-java.version>
 
         <pom-tuner.version>4.2.0</pom-tuner.version>
         <maven.version>3.8.7</maven.version>
@@ -123,6 +125,20 @@
     <dependencyManagement>
         <dependencies>
             <!-- boms -->
+            <dependency>
+                <groupId>org.testcontainers</groupId>
+                <artifactId>testcontainers-bom</artifactId>
+                <version>${testcontainers.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.github.docker-java</groupId>
+                <artifactId>docker-java-bom</artifactId>
+                <version>${docker-java.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
             <dependency>
                 <groupId>io.quarkus</groupId>
                 <artifactId>quarkus-bom</artifactId>

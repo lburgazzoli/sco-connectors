@@ -39,13 +39,12 @@ spec:
           registryUrl: '{{registryUrl:}}'
           username: '{{user}}'
           password: '{{password}}'
+          securityProtocol: "{{securityProtocol:}}"
+          saslMechanism: "{{saslMechanism:}}"
     from:
       uri: "{{kc}}:{{topic}}"
       parameters:
-        securityProtocol: "{{securityProtocol:SASL_SSL}}"
-        saslMechanism: "{{saslMechanism:PLAIN}}"
-        saslJaasConfig: "org.apache.kafka.common.security.plain.PlainLoginModule required username='{{user}}' password='{{password}}';"
-        autoOffsetReset: "{{autoOffsetReset:latest}}"
+        autoOffsetReset: "{{autoOffsetReset:earliest}}"
         groupId: "{{?consumerGroup}}"
         keyDeserializer: "{{keyDeserializer:org.apache.kafka.common.serialization.ByteArrayDeserializer}}"
         valueDeserializer: "{{valueDeserializer:com.github.sco1237896.connector.kamelet.serdes.bytes.ByteArrayDeserializer}}"
