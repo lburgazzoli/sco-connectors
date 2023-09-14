@@ -2,6 +2,7 @@ package com.github.sco1237896.connector.it.nosql.mongodb
 
 import com.github.sco1237896.connector.it.support.ContainerImages
 import com.github.sco1237896.connector.it.support.KafkaConnectorSpec
+import com.github.sco1237896.connector.it.support.KafkaContainer
 import com.mongodb.client.MongoClients
 import com.mongodb.client.model.CreateCollectionOptions
 import groovy.util.logging.Slf4j
@@ -58,14 +59,18 @@ class MongoConnectorIT extends KafkaConnectorSpec {
             def collection = database.getCollection("cards")
 
             def topic = topic()
-            def group = UUID.randomUUID().toString()
+            def group = uid()
             def payload = "{ \"value\": ${ssl}, \"suit\": \"hearts\" }"
 
             def cnt = forDefinition('mongodb_sink_v1.yaml')
                 .withSourceProperties([
                         'topic': topic,
                         'bootstrapServers': kafka.outsideBootstrapServers,
-                        'consumerGroup': UUID.randomUUID().toString(),
+                        'consumerGroup': uid(),
+                        'user': kafka.username,
+                        'password': kafka.password,
+                        'securityProtocol': KafkaContainer.SECURITY_PROTOCOL,
+                        'saslMechanism': KafkaContainer.SASL_MECHANISM,
                 ])
                 .withSinkProperties([
                         'hosts': "${CONTAINER_NAME}:${CONTAINER_PORT}",
@@ -107,14 +112,18 @@ class MongoConnectorIT extends KafkaConnectorSpec {
             def collection = database.getCollection("boardgames", Document.class)
 
             def topic = topic()
-            def group = UUID.randomUUID().toString()
+            def group = uid()
             def payload = "{ \"owned\": ${ssl}, \"title\": \"powergrid\" }"
 
             def cnt = forDefinition('mongodb_source_v1.yaml')
                 .withSinkProperties([
                         'topic': topic,
                         'bootstrapServers': kafka.outsideBootstrapServers,
-                        'consumerGroup': UUID.randomUUID().toString(),
+                        'consumerGroup': uid(),
+                        'user': kafka.username,
+                        'password': kafka.password,
+                        'securityProtocol': KafkaContainer.SECURITY_PROTOCOL,
+                        'saslMechanism': KafkaContainer.SASL_MECHANISM,
                 ])
                 .withSourceProperties([
                         'hosts': "${CONTAINER_NAME}:${CONTAINER_PORT}",

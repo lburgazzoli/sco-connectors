@@ -191,13 +191,12 @@ public class GenerateCatalogMojo extends AbstractMojo {
                     diff = SetUtils.difference(newDependencies, this.manifest.getDependencies());
                 }
 
+                getLog().info("Detected diff in dependencies (" + diff.size() + ")");
+
                 if (!diff.isEmpty()) {
-                    getLog().info("Detected diff in dependencies (" + diff.size() + "):");
                     diff.forEach(d -> {
-                        getLog().info("  " + d);
+                        getLog().debug("  " + d);
                     });
-                } else {
-                    getLog().info("Detected diff in dependencies (" + diff.size() + ")");
                 }
 
                 this.manifest.bump();
@@ -219,7 +218,7 @@ public class GenerateCatalogMojo extends AbstractMojo {
             for (ConnectorDefinition connector : connectorList) {
                 Pipe def = generateDefinitions(kameletsCatalog, connector);
 
-                this.manifest.getTypes().add(def.getMetadata().getAnnotations().get("sco1237896.github.com/connector.id"));
+                this.manifest.getTypes().add(def.getMetadata().getAnnotations().get(annotationsPrefix + "/connector.id"));
             }
 
             //

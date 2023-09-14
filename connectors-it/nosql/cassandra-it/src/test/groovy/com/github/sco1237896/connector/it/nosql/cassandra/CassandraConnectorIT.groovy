@@ -6,6 +6,7 @@ import com.datastax.driver.core.ResultSet
 import com.datastax.driver.core.Session
 import com.datastax.driver.core.Statement
 import com.datastax.driver.core.schemabuilder.SchemaBuilder
+import com.github.sco1237896.connector.it.support.KafkaContainer
 import groovy.util.logging.Slf4j
 import com.github.sco1237896.connector.it.support.ContainerImages
 import com.github.sco1237896.connector.it.support.KafkaConnectorSpec
@@ -57,7 +58,7 @@ class CassandraConnectorIT extends KafkaConnectorSpec {
     def "cassandra sink"() {
         setup:
             def topic = topic()
-            def group = UUID.randomUUID().toString()
+            def group = uid()
             def payload = '''["ciao"]'''
 
 
@@ -65,7 +66,11 @@ class CassandraConnectorIT extends KafkaConnectorSpec {
                 .withSourceProperties([
                     'topic': topic,
                     'bootstrapServers': kafka.outsideBootstrapServers,
-                    'consumerGroup': UUID.randomUUID().toString(),
+                    'consumerGroup': uid(),
+                    'user': kafka.username,
+                    'password': kafka.password,
+                    'securityProtocol': KafkaContainer.SECURITY_PROTOCOL,
+                    'saslMechanism': KafkaContainer.SASL_MECHANISM,
                 ])
                 .withSinkProperties([
                     'connectionHost': CONTAINER_NAME,
@@ -105,7 +110,11 @@ class CassandraConnectorIT extends KafkaConnectorSpec {
                 .withSinkProperties([
                     'topic': topic,
                     'bootstrapServers': kafka.outsideBootstrapServers,
-                    'consumerGroup': UUID.randomUUID().toString(),
+                    'consumerGroup': uid(),
+                    'user': kafka.username,
+                    'password': kafka.password,
+                    'securityProtocol': KafkaContainer.SECURITY_PROTOCOL,
+                    'saslMechanism': KafkaContainer.SASL_MECHANISM,
                 ])
                 .withSourceProperties([
                     'connectionHost': CONTAINER_NAME,

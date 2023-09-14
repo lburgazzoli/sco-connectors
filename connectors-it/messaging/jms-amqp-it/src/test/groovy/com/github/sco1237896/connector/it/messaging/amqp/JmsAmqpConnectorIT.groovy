@@ -2,6 +2,7 @@ package com.github.sco1237896.connector.it.messaging.amqp
 
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.github.sco1237896.connector.it.support.KafkaContainer
 import groovy.util.logging.Slf4j
 import org.apache.qpid.jms.JmsConnectionFactory
 import com.github.sco1237896.connector.it.support.AwaitStrategy
@@ -61,14 +62,18 @@ class JmsAmqpConnectorIT extends KafkaConnectorSpec {
             MessageConsumer consumer = session.createConsumer(queue)
 
             def topic = topic()
-            def group = UUID.randomUUID().toString()
+            def group = uid()
             def payload = '''{ "value": "4", "suit": "hearts" }'''
 
             def cnt = forDefinition('jms_amqp_10_sink_v1.yaml')
                 .withSourceProperties([
                     'topic': topic,
                     'bootstrapServers': kafka.outsideBootstrapServers,
-                    'consumerGroup': UUID.randomUUID().toString(),
+                    'consumerGroup': uid(),
+                    'user': kafka.username,
+                    'password': kafka.password,
+                    'securityProtocol': KafkaContainer.SECURITY_PROTOCOL,
+                    'saslMechanism': KafkaContainer.SASL_MECHANISM,
                 ])
                 .withSinkProperties([
                     "remoteURI": "amqp://${CONTAINER_NAME}:${CONTAINER_PORT}",

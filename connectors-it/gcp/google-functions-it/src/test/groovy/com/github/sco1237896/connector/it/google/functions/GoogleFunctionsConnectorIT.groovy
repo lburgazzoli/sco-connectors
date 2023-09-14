@@ -1,5 +1,6 @@
 package com.github.sco1237896.connector.it.google.functions
 
+import com.github.sco1237896.connector.it.support.KafkaContainer
 import groovy.util.logging.Slf4j
 import com.github.sco1237896.connector.it.support.KafkaConnectorSpec
 import com.github.sco1237896.connector.it.support.TestUtils
@@ -36,15 +37,19 @@ class GoogleFunctionsConnectorIT extends KafkaConnectorSpec {
             assert webhookId
 
             def kafkaTopic = topic()
-            def kafkaGroup = UUID.randomUUID().toString()
-            def message = UUID.randomUUID().toString()
+            def kafkaGroup = uid()
+            def message = uid()
             def payload =   """ {"url":"https://webhook.site/${webhookId}", "message":"${message}"} """
 
             def cnt = forDefinition('google_functions_sink_v1.yaml')
                 .withSourceProperties([
                         'topic': kafkaTopic,
                         'bootstrapServers': kafka.outsideBootstrapServers,
-                        'consumerGroup': UUID.randomUUID().toString(),
+                        'consumerGroup': uid(),
+                        'user': kafka.username,
+                        'password': kafka.password,
+                        'securityProtocol': KafkaContainer.SECURITY_PROTOCOL,
+                        'saslMechanism': KafkaContainer.SASL_MECHANISM,
                 ])
                 .withSinkProperties([
                         'projectUd': System.getenv('GCP_FUNCTIONS_PROJECT_ID'),

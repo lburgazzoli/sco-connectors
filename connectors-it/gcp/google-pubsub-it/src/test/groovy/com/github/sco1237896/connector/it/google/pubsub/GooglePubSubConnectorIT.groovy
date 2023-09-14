@@ -1,6 +1,7 @@
 package com.github.sco1237896.connector.it.google.pubsub
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.github.sco1237896.connector.it.support.KafkaContainer
 import com.google.api.gax.core.NoCredentialsProvider
 import com.google.api.gax.grpc.GrpcTransportChannel
 import com.google.api.gax.rpc.FixedTransportChannelProvider
@@ -47,7 +48,7 @@ class GooglePubSubConnectorIT extends KafkaConnectorSpec {
     def "google pubsub sink"() {
         setup:
             def kafkaTopic = topic()
-            def kafkaGroup = UUID.randomUUID().toString()
+            def kafkaGroup = uid()
             def payload = '''{ "value": "4", "suit": "hearts" }'''
 
             ManagedChannel channel = ManagedChannelBuilder.forTarget(container.getEmulatorEndpoint()).usePlaintext().build();
@@ -71,7 +72,11 @@ class GooglePubSubConnectorIT extends KafkaConnectorSpec {
                 .withSourceProperties([
                         'topic': kafkaTopic,
                         'bootstrapServers': kafka.outsideBootstrapServers,
-                        'consumerGroup': UUID.randomUUID().toString(),
+                        'consumerGroup': uid(),
+                        'user': kafka.username,
+                        'password': kafka.password,
+                        'securityProtocol': KafkaContainer.SECURITY_PROTOCOL,
+                        'saslMechanism': KafkaContainer.SASL_MECHANISM,
                 ])
                 .withSinkProperties([
                         'projectId': PROJECT_ID,

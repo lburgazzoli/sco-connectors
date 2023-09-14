@@ -1,5 +1,6 @@
 package com.github.sco1237896.connector.it.storage.minio
 
+import com.github.sco1237896.connector.it.support.KafkaContainer
 import io.minio.GetObjectArgs
 import io.minio.PutObjectArgs
 import com.github.sco1237896.connector.it.support.KafkaConnectorSpec
@@ -25,7 +26,7 @@ class MinioConnectorIT extends KafkaConnectorSpec {
     def "minio sink"() {
         setup:
             def payload = '''{ "username":"oscerd", "city":"Rome" }'''
-            def objectName = UUID.randomUUID().toString()
+            def objectName = uid()
             def topic = topic()
             def getArgs = GetObjectArgs.builder().bucket(topic).object(objectName).build()
 
@@ -33,7 +34,11 @@ class MinioConnectorIT extends KafkaConnectorSpec {
                 .withSourceProperties([
                     'topic': topic,
                     'bootstrapServers': kafka.outsideBootstrapServers,
-                    'consumerGroup': UUID.randomUUID().toString(),
+                    'consumerGroup': uid(),
+                    'user': kafka.username,
+                    'password': kafka.password,
+                    'securityProtocol': KafkaContainer.SECURITY_PROTOCOL,
+                    'saslMechanism': KafkaContainer.SASL_MECHANISM,
                 ])
                 .withSinkProperties([
                     'accessKey': minio.accessKey,
@@ -67,7 +72,7 @@ class MinioConnectorIT extends KafkaConnectorSpec {
     def "minio source"() {
         setup:
             def payload = '''{ "username":"oscerd", "city":"Rome" }'''
-            def objectName = UUID.randomUUID().toString()
+            def objectName = uid()
             def topic = topic()
             def getArgs = GetObjectArgs.builder().bucket(topic).object(objectName).build()
 
@@ -76,7 +81,11 @@ class MinioConnectorIT extends KafkaConnectorSpec {
                 .withSinkProperties([
                         'topic': topic,
                         'bootstrapServers': kafka.outsideBootstrapServers,
-                        'consumerGroup': UUID.randomUUID().toString(),
+                        'consumerGroup': uid(),
+                        'user': kafka.username,
+                        'password': kafka.password,
+                        'securityProtocol': KafkaContainer.SECURITY_PROTOCOL,
+                        'saslMechanism': KafkaContainer.SASL_MECHANISM,
                 ])
                 .withSourceProperties([
                         'accessKey': minio.accessKey,

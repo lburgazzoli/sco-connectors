@@ -6,6 +6,7 @@ import com.azure.messaging.eventhubs.EventDataBatch
 import com.azure.messaging.eventhubs.EventHubClientBuilder
 import com.azure.messaging.eventhubs.EventProcessorClientBuilder
 import com.azure.messaging.eventhubs.models.EventPosition
+import com.github.sco1237896.connector.it.support.KafkaContainer
 import groovy.util.logging.Slf4j
 import com.github.sco1237896.connector.it.support.KafkaConnectorSpec
 import com.github.sco1237896.connector.it.support.TestUtils
@@ -30,7 +31,7 @@ class AzureEventHubsConnectorIT extends KafkaConnectorSpec {
     def "azure-eventhubs sink"() {
         setup:
             def topic = topic()
-            def group = UUID.randomUUID().toString()
+            def group = uid()
             def payload = """{ "value": "4", "suit": "${group}" }"""
             def headers = Map.of('foo', 'bar', 'foo2', group)
 
@@ -44,7 +45,11 @@ class AzureEventHubsConnectorIT extends KafkaConnectorSpec {
                 .withSourceProperties([
                         'topic': topic,
                         'bootstrapServers': kafka.outsideBootstrapServers,
-                        'consumerGroup': UUID.randomUUID().toString(),
+                        'consumerGroup': uid(),
+                        'user': kafka.username,
+                        'password': kafka.password,
+                        'securityProtocol': KafkaContainer.SECURITY_PROTOCOL,
+                        'saslMechanism': KafkaContainer.SASL_MECHANISM,
                 ])
                 .withSinkProperties([
                         'eventhubName': eventhubName,
@@ -107,7 +112,7 @@ class AzureEventHubsConnectorIT extends KafkaConnectorSpec {
         setup:
             def start = Instant.now();
             def topic = topic()
-            def group = UUID.randomUUID().toString()
+            def group = uid()
             def payload = """{ "value": "4", "suit": "${group}" }"""
 
             def namespaceName = System.getenv('AZURE_NAMESPACE_NAME')
@@ -123,7 +128,11 @@ class AzureEventHubsConnectorIT extends KafkaConnectorSpec {
                 .withSinkProperties([
                         'topic': topic,
                         'bootstrapServers': kafka.outsideBootstrapServers,
-                        'consumerGroup': UUID.randomUUID().toString(),
+                        'consumerGroup': uid(),
+                        'user': kafka.username,
+                        'password': kafka.password,
+                        'securityProtocol': KafkaContainer.SECURITY_PROTOCOL,
+                        'saslMechanism': KafkaContainer.SASL_MECHANISM,
                 ])
                 .withSourceProperties([
                         'eventhubName': eventhubName,
@@ -137,8 +146,6 @@ class AzureEventHubsConnectorIT extends KafkaConnectorSpec {
                 .build()
 
             cnt.withEnv("AZURE_LOG_LEVEL", System.getenv().getOrDefault('AZURE_LOG_LEVEL', 'warn'))
-            cnt.withCamelComponentDebugEnv()
-
             cnt.start()
 
             // azure sdk client to write the message to EventHub

@@ -1,8 +1,8 @@
 package com.github.sco1237896.connector.it.sql.postgresql
 
-
 import com.github.sco1237896.connector.it.support.ContainerImages
 import com.github.sco1237896.connector.it.support.KafkaConnectorSpec
+import com.github.sco1237896.connector.it.support.KafkaContainer
 import groovy.sql.Sql
 import groovy.util.logging.Slf4j
 import org.testcontainers.containers.PostgreSQLContainer
@@ -42,13 +42,16 @@ class PostgresConnectorIT extends KafkaConnectorSpec {
             """)
 
             def topic = topic()
-            def group = UUID.randomUUID().toString()
 
             def cnt = forDefinition('postgresql_sink_v1.yaml')
                 .withSourceProperties([
                     'topic': topic,
                     'bootstrapServers': kafka.outsideBootstrapServers,
-                    'consumerGroup': UUID.randomUUID().toString(),
+                    'consumerGroup': uid(),
+                    'user': kafka.username,
+                    'password': kafka.password,
+                    'securityProtocol': KafkaContainer.SECURITY_PROTOCOL,
+                    'saslMechanism': KafkaContainer.SASL_MECHANISM,
                 ])
                 .withSinkProperties([
                     'serverName': CONTAINER_NAME,
@@ -64,6 +67,7 @@ class PostgresConnectorIT extends KafkaConnectorSpec {
         when:
             kafka.send(topic, payload)
         then:
+            def group = uid()
             def records = kafka.poll(group, topic)
             records.size() == 1
             records.first().value() == payload

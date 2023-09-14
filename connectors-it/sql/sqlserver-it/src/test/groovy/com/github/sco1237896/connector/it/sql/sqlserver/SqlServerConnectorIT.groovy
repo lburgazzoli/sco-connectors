@@ -1,5 +1,6 @@
 package com.github.sco1237896.connector.it.sql.sqlserver
 
+import com.github.sco1237896.connector.it.support.KafkaContainer
 import groovy.sql.Sql
 import groovy.util.logging.Slf4j
 import com.github.sco1237896.connector.it.support.ContainerImages
@@ -38,7 +39,7 @@ class SqlServerConnectorIT extends KafkaConnectorSpec {
             sql.execute('CREATE TABLE connector.dbo.accounts (username VARCHAR(50) UNIQUE NOT NULL, city VARCHAR(50))')
 
             def topic = topic()
-            def group = UUID.randomUUID().toString()
+            def group = uid()
 
 
 
@@ -46,7 +47,11 @@ class SqlServerConnectorIT extends KafkaConnectorSpec {
                 .withSourceProperties([
                     'topic': topic,
                     'bootstrapServers': kafka.outsideBootstrapServers,
-                    'consumerGroup': UUID.randomUUID().toString(),
+                    'consumerGroup': uid(),
+                    'user': kafka.username,
+                    'password': kafka.password,
+                    'securityProtocol': KafkaContainer.SECURITY_PROTOCOL,
+                    'saslMechanism': KafkaContainer.SASL_MECHANISM,
                 ])
                 .withSinkProperties([
                     'serverName': CONTAINER_NAME,
