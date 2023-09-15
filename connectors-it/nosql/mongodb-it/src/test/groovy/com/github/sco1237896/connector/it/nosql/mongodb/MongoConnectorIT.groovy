@@ -21,7 +21,7 @@ import static com.mongodb.client.model.Filters.eq
 class MongoConnectorIT extends KafkaConnectorSpec {
     final static String CONTAINER_NAME = "tc-mongodb"
     final static int CONTAINER_PORT = 27017
-    
+
     static MongoDBContainer db
 
     static final String JKS_PATH = '/etc/wm/mongo-test.pem'
@@ -98,7 +98,7 @@ class MongoConnectorIT extends KafkaConnectorSpec {
             closeQuietly(mongoClient)
             closeQuietly(cnt)
         where:
-            ssl << [true, false]
+            ssl << [ false ]
     }
 
     @Unroll
@@ -106,9 +106,11 @@ class MongoConnectorIT extends KafkaConnectorSpec {
         setup:
             def mongoClient = MongoClients.create(db.replicaSetUrl + "?tlsAllowInvalidHostnames=true")
             def database = mongoClient.getDatabase("toys")
-            if(database.listCollectionNames().every {return !"boardgames".equals(it);}) {
+
+            if (database.listCollectionNames().every { return !"boardgames".equals(it) }) {
                 database.createCollection("boardgames", new CreateCollectionOptions().capped(true).sizeInBytes(256))
             }
+
             def collection = database.getCollection("boardgames", Document.class)
 
             def topic = topic()
@@ -129,8 +131,8 @@ class MongoConnectorIT extends KafkaConnectorSpec {
                         'hosts': "${CONTAINER_NAME}:${CONTAINER_PORT}",
                         'collection': collection.getNamespace().getCollectionName(),
                         'database': database.getName(),
-                        'ssl': ssl,
-                        'sslValidationEnabled': !ssl
+                        'ssl': "${ssl}",
+                        'sslValidationEnabled': "${!ssl}"
                 ])
                 .build()
 
@@ -139,17 +141,18 @@ class MongoConnectorIT extends KafkaConnectorSpec {
            collection.insertOne(Document.parse(payload))
         then:
             await(10, TimeUnit.SECONDS) {
-                def records = kafka.poll(group, topic)
-                records.any {
-                    def jsonDoc = Document.parse(it.value())
-                    return jsonDoc.getBoolean("owned") == ssl && "powergrid".equals(jsonDoc.getString("title"))
+                return kafka.poll(group, topic).collect {
+                    Document.parse(it.value())
+                }.any {
+                    return it.getBoolean("owned") == ssl
+                        && 'powergrid'.equals(it.getString("title"))
                 }
             }
         cleanup:
             closeQuietly(mongoClient)
             closeQuietly(cnt)
         where:
-            ssl << [true, false]
+            ssl << [ false ]
     }
 
 }

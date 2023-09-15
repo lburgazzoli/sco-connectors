@@ -1,8 +1,8 @@
 package com.github.sco1237896.connector.it.nosql.mongodb
 
-import groovy.util.logging.Slf4j
 import com.github.sco1237896.connector.it.support.ConnectorContainer
 import com.github.sco1237896.connector.it.support.SimpleConnectorSpec
+import groovy.util.logging.Slf4j
 
 @Slf4j
 class MongoConnectorContainerIT extends SimpleConnectorSpec {
