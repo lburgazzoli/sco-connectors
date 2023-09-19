@@ -72,7 +72,7 @@ spec:
     - "camel:core"
     - "camel:jackson"
     - "camel:kamelet"
-    - "camel:elasticsearch-rest"
+    - "camel:elasticsearch"
     - "camel:gson"
     - "camel:bean"
   template:

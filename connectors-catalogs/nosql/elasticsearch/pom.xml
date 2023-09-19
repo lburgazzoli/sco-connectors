@@ -73,7 +73,7 @@
                 </dependency>
                 <dependency>
                     <groupId>org.apache.camel.quarkus</groupId>
-                    <artifactId>camel-quarkus-elasticsearch-rest</artifactId>
+                    <artifactId>camel-quarkus-elasticsearch</artifactId>
                 </dependency>
                 <dependency>
                     <groupId>org.apache.camel.quarkus</groupId>

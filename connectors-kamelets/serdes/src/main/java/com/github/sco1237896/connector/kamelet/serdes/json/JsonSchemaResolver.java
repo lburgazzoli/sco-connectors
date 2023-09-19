@@ -1,21 +1,20 @@
 package com.github.sco1237896.connector.kamelet.serdes.json;
 
-import java.io.InputStream;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-
-import org.apache.camel.Exchange;
-import org.apache.camel.ExtendedCamelContext;
-import org.apache.camel.Processor;
-import org.apache.camel.component.jackson.SchemaResolver;
-import org.apache.camel.spi.Resource;
-import org.apache.camel.util.ObjectHelper;
-import com.github.sco1237896.connector.kamelet.serdes.Serdes;
-
 import com.fasterxml.jackson.core.FormatSchema;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.github.sco1237896.connector.kamelet.serdes.Serdes;
 import com.github.victools.jsonschema.generator.SchemaGenerator;
+import org.apache.camel.Exchange;
+import org.apache.camel.Processor;
+import org.apache.camel.component.jackson.SchemaResolver;
+import org.apache.camel.spi.Resource;
+import org.apache.camel.support.PluginHelper;
+import org.apache.camel.util.ObjectHelper;
+
+import java.io.InputStream;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import static com.github.sco1237896.connector.kamelet.serdes.SerdesHelper.isPojo;
 
@@ -90,9 +89,7 @@ public class JsonSchemaResolver implements SchemaResolver, Processor {
             }
 
             answer = this.schemes.computeIfAbsent(contentClass, t -> {
-                Resource res = exchange.getContext()
-                        .adapt(ExtendedCamelContext.class)
-                        .getResourceLoader()
+                Resource res = PluginHelper.getResourceLoader(exchange.getContext())
                         .resolveResource("classpath:schemas/" + Json.SCHEMA_TYPE + "/" + t + "." + Json.SCHEMA_TYPE);
 
                 try {

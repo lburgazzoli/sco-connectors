@@ -31,7 +31,6 @@ import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
@@ -59,14 +58,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
-import static com.github.sco1237896.tools.maven.connector.support.ConnectorConstants.CONNECTOR_REVISION;
 import static com.github.sco1237896.tools.maven.connector.support.ConnectorConstants.TRAIT_CAMEL_APACHE_ORG_CONTAINER_IMAGE;
 import static java.util.Optional.ofNullable;
 

@@ -15,16 +15,16 @@
         <project.reporting.outputEncoding>${resources.encoding}</project.reporting.outputEncoding>
         <project.resources.sourceEncoding>${resources.encoding}</project.resources.sourceEncoding>
 
-        <quarkus.version>2.13.0.Final</quarkus.version>
+        <quarkus.version>3.2.6.Final</quarkus.version>
         <camel-k.version>2.0.1</camel-k.version>
-        <camel-k-runtime.version>1.15.0</camel-k-runtime.version>
-        <camel-quarkus.version>2.13.0</camel-quarkus.version>
-        <camel.version>3.18.2</camel.version>
+        <camel-k-runtime.version>3.2.0</camel-k-runtime.version>
+        <camel-quarkus.version>3.2.0</camel-quarkus.version>
+        <camel.version>4.0.0</camel.version>
 
         <classgraph.version>4.8.157</classgraph.version>
         <jsonschema-generator.version>4.29.0</jsonschema-generator.version>
-        <apicurio.version>2.2.0.Final</apicurio.version>
-        <apicurio-client.version>0.1.7.Final</apicurio-client.version>
+        <apicurio.version>2.4.7.Final</apicurio.version>
+        <apicurio-client.version>0.1.18.Final</apicurio-client.version>
         <json-schema-avro.version>0.1.8</json-schema-avro.version>
         <groovy.version>4.0.11</groovy.version>
         <spock.version>2.3-groovy-4.0</spock.version>
@@ -246,11 +246,6 @@
                 <groupId>com.github.sco1237896</groupId>
                 <artifactId>connectors-core-deployment</artifactId>
                 <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.github.sco1237896</groupId>
-                <artifactId>connectors-component-routecontroller</artifactId>
-                <version>0.0.1-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.github.sco1237896</groupId>

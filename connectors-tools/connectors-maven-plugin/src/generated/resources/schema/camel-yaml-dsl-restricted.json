@@ -39,6 +39,9 @@
           "description" : {
             "type" : "string"
           },
+          "disabled" : {
+            "type" : "boolean"
+          },
           "id" : {
             "type" : "string"
           },
@@ -83,6 +86,9 @@
           },
           "jq" : {
             "$ref" : "#/items/definitions/org.apache.camel.model.language.JqExpression"
+          },
+          "js" : {
+            "$ref" : "#/items/definitions/org.apache.camel.model.language.JavaScriptExpression"
           }
         }
       },
@@ -95,6 +101,9 @@
         "properties" : {
           "description" : {
             "type" : "string"
+          },
+          "disabled" : {
+            "type" : "boolean"
           },
           "expression" : {
             "$ref" : "#/items/definitions/org.apache.camel.model.language.ExpressionDefinition"
@@ -123,6 +132,9 @@
           "description" : {
             "type" : "string"
           },
+          "disabled" : {
+            "type" : "boolean"
+          },
           "id" : {
             "type" : "string"
           },
@@ -147,6 +159,9 @@
           "description" : {
             "type" : "string"
           },
+          "disabled" : {
+            "type" : "boolean"
+          },
           "expression" : {
             "$ref" : "#/items/definitions/org.apache.camel.model.language.ExpressionDefinition"
           },
@@ -168,16 +183,38 @@
           "description" : {
             "type" : "string"
           },
+          "disabled" : {
+            "type" : "boolean"
+          },
           "expression" : {
             "$ref" : "#/items/definitions/org.apache.camel.model.language.ExpressionDefinition"
+          },
+          "from-type" : {
+            "type" : "string"
           },
           "id" : {
             "type" : "string"
           },
           "inherit-error-handler" : {
             "type" : "boolean"
+          },
+          "to-type" : {
+            "type" : "string"
           }
         }
+      },
+      "org.apache.camel.model.ValueDefinition" : {
+        "oneOf" : [ {
+          "type" : "string"
+        }, {
+          "type" : "object",
+          "additionalProperties" : false,
+          "properties" : {
+            "value" : {
+              "type" : "string"
+            }
+          }
+        } ]
       },
       "org.apache.camel.model.WhenDefinition" : {
         "type" : "object",
@@ -188,6 +225,9 @@
         "properties" : {
           "description" : {
             "type" : "string"
+          },
+          "disabled" : {
+            "type" : "boolean"
           },
           "expression" : {
             "$ref" : "#/items/definitions/org.apache.camel.model.language.ExpressionDefinition"
@@ -203,6 +243,165 @@
             "items" : {
               "$ref" : "#/items/definitions/org.apache.camel.model.ProcessorDefinition"
             }
+          }
+        }
+      },
+      "org.apache.camel.model.app.ApplicationDefinition" : {
+        "type" : "object",
+        "additionalProperties" : false,
+        "properties" : {
+          "bean" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/items/definitions/org.apache.camel.model.app.RegistryBeanDefinition"
+            }
+          },
+          "component-scan" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/items/definitions/org.apache.camel.model.app.ComponentScanDefinition"
+            }
+          },
+          "rest" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/items/definitions/org.apache.camel.model.rest.RestDefinition"
+            }
+          },
+          "rest-configuration" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/items/definitions/org.apache.camel.model.rest.RestConfigurationDefinition"
+            }
+          },
+          "route" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/items/definitions/org.apache.camel.model.RouteDefinition"
+            }
+          },
+          "route-configuration" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/items/definitions/org.apache.camel.model.RouteConfigurationDefinition"
+            }
+          },
+          "route-template" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/items/definitions/org.apache.camel.model.RouteTemplateDefinition"
+            }
+          },
+          "templated-route" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/items/definitions/org.apache.camel.model.TemplatedRouteDefinition"
+            }
+          }
+        }
+      },
+      "org.apache.camel.model.app.BeanPropertiesDefinition" : {
+        "type" : "object",
+        "additionalProperties" : false,
+        "properties" : {
+          "property" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/items/definitions/org.apache.camel.model.app.BeanPropertyDefinition"
+            }
+          }
+        }
+      },
+      "org.apache.camel.model.app.BeanPropertyDefinition" : {
+        "type" : "object",
+        "additionalProperties" : false,
+        "properties" : {
+          "key" : {
+            "type" : "string"
+          },
+          "properties" : {
+            "$ref" : "#/items/definitions/org.apache.camel.model.app.BeanPropertiesDefinition"
+          },
+          "value" : {
+            "type" : "string"
+          }
+        }
+      },
+      "org.apache.camel.model.app.BeansDefinition" : {
+        "type" : "object",
+        "additionalProperties" : false,
+        "properties" : {
+          "bean" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/items/definitions/org.apache.camel.model.app.RegistryBeanDefinition"
+            }
+          },
+          "component-scan" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/items/definitions/org.apache.camel.model.app.ComponentScanDefinition"
+            }
+          },
+          "rest" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/items/definitions/org.apache.camel.model.rest.RestDefinition"
+            }
+          },
+          "rest-configuration" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/items/definitions/org.apache.camel.model.rest.RestConfigurationDefinition"
+            }
+          },
+          "route" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/items/definitions/org.apache.camel.model.RouteDefinition"
+            }
+          },
+          "route-configuration" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/items/definitions/org.apache.camel.model.RouteConfigurationDefinition"
+            }
+          },
+          "route-template" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/items/definitions/org.apache.camel.model.RouteTemplateDefinition"
+            }
+          },
+          "templated-route" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/items/definitions/org.apache.camel.model.TemplatedRouteDefinition"
+            }
+          }
+        }
+      },
+      "org.apache.camel.model.app.ComponentScanDefinition" : {
+        "type" : "object",
+        "additionalProperties" : false,
+        "properties" : {
+          "base-package" : {
+            "type" : "string"
+          }
+        }
+      },
+      "org.apache.camel.model.app.RegistryBeanDefinition" : {
+        "type" : "object",
+        "additionalProperties" : false,
+        "properties" : {
+          "name" : {
+            "type" : "string"
+          },
+          "properties" : {
+            "type" : "object"
+          },
+          "type" : {
+            "type" : "string"
           }
         }
       },
@@ -267,6 +466,9 @@
           },
           "jq" : {
             "$ref" : "#/items/definitions/org.apache.camel.model.language.JqExpression"
+          },
+          "js" : {
+            "$ref" : "#/items/definitions/org.apache.camel.model.language.JavaScriptExpression"
           }
         }
       },
@@ -290,6 +492,29 @@
         } ],
         "required" : [ "expression" ]
       },
+      "org.apache.camel.model.language.JavaScriptExpression" : {
+        "oneOf" : [ {
+          "type" : "string"
+        }, {
+          "type" : "object",
+          "additionalProperties" : false,
+          "properties" : {
+            "expression" : {
+              "type" : "string"
+            },
+            "id" : {
+              "type" : "string"
+            },
+            "result-type" : {
+              "type" : "string"
+            },
+            "trim" : {
+              "type" : "boolean"
+            }
+          }
+        } ],
+        "required" : [ "expression" ]
+      },
       "org.apache.camel.model.language.JqExpression" : {
         "oneOf" : [ {
           "type" : "string"
@@ -304,6 +529,9 @@
               "type" : "string"
             },
             "id" : {
+              "type" : "string"
+            },
+            "property-name" : {
               "type" : "string"
             },
             "result-type" : {
